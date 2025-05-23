@@ -1,10 +1,8 @@
 package com.phumlanidev.cartservice.dto;
 
-
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Comment: this is the placeholder for documentation.

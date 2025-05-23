@@ -2,9 +2,8 @@ package com.phumlanidev.cartservice.dto;
 
 
 import com.phumlanidev.cartservice.model.Cart;
-import lombok.Data;
-
 import java.math.BigDecimal;
+import lombok.Data;
 
 /**
  * Comment: this is the placeholder for documentation.

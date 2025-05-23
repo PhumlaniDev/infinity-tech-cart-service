@@ -7,13 +7,12 @@ import com.phumlanidev.cartservice.model.CartItem;
 import com.phumlanidev.cartservice.repository.CartRepository;
 import com.phumlanidev.cartservice.service.ICartService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
 
 /**
  * Comment: this is the placeholder for documentation.

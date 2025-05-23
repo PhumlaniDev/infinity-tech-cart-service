@@ -5,11 +5,9 @@ import com.phumlanidev.cartservice.dto.CartDto;
 import com.phumlanidev.cartservice.dto.CartItemDto;
 import com.phumlanidev.cartservice.model.Cart;
 import com.phumlanidev.cartservice.model.CartItem;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
-
 
 /**
  * Comment: this is the placeholder for documentation.
