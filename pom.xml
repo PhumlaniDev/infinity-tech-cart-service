@@ -101,6 +101,48 @@
 	</dependencyManagement>
 	<build>
 		<plugins>
+			<!--spring maven-->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<!-- Checkstyle Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.2.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>10.20.1</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- Path to your custom or Google checks configuration -->
+					<configLocation>google_checks.xml</configLocation>
+					<failOnViolation>true</failOnViolation>
+					<linkXRef>false</linkXRef>
+				</configuration>
+			</plugin>
+
 			<!--  Jacoco  -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -124,32 +166,27 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!--  Maven Surefire  -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
 				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</path>
-					</annotationProcessorPaths>
+					<includes>
+						<include>**/*Test.java</include>
+					</includes>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.junit.platform</groupId>
+						<artifactId>junit-platform-launcher</artifactId>
+						<version>1.10.3</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
+
 	<reporting>
 		<plugins>
 			<plugin>
@@ -162,6 +199,7 @@
 			</plugin>
 		</plugins>
 	</reporting>
+
 	<profiles>
 		<!-- jacoco -->
 		<profile>
@@ -191,53 +229,6 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>
-
-					<!-- Checkstyle Plugin -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
-						<version>3.2.0</version>
-						<dependencies>
-							<dependency>
-								<groupId>com.puppycrawl.tools</groupId>
-								<artifactId>checkstyle</artifactId>
-								<version>10.20.1</version>
-							</dependency>
-						</dependencies>
-						<executions>
-							<execution>
-								<phase>validate</phase>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<!-- Path to your custom or Google checks configuration -->
-							<configLocation>google_checks.xml</configLocation>
-							<failOnViolation>true</failOnViolation>
-							<linkXRef>false</linkXRef>
-						</configuration>
-					</plugin>
-
-					<!--  Maven Surefire  -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>3.2.5</version>
-						<configuration>
-							<includes>
-								<include>**/*Test.java</include>
-							</includes>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>org.junit.platform</groupId>
-								<artifactId>junit-platform-launcher</artifactId>
-								<version>1.10.3</version>
-							</dependency>
-						</dependencies>
 					</plugin>
 				</plugins>
 			</build>
