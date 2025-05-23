@@ -1,0 +1,19 @@
+package com.phumlanidev.cartservice.dto;
+
+
+import com.phumlanidev.cartservice.model.Cart;
+import lombok.Data;
+
+import java.math.BigDecimal;
+
+/**
+ * Comment: this is the placeholder for documentation.
+ */
+@Data
+public class CartItemDto {
+
+  private Cart cart; // foreign key reference
+  private Long productId; // foreign key reference
+  private BigDecimal quantity;
+  private BigDecimal price;
+}

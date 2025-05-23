@@ -1,0 +1,35 @@
+name: Dependabot Discord Notification
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - closed
+      - synchronize
+    branches:
+      - main
+      - develop  # Matches target branch from your dependabot.yml
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  notify:
+    if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
+    uses: PhumlaniDev/reusable-workflows/.github/workflows/discord-notify.yml@main
+    with:
+      status: success
+      title: "🤖 GitHub Bot PR: ${{ github.event.action }}"
+      description: |
+        **Dependabot PR Notification**
+        - PR: #${{ github.event.pull_request.number }}
+        - Title: `${{ github.event.pull_request.title }}`
+        - State: `${{ github.event.pull_request.state }}`
+        - Labels: `${{ join(github.event.pull_request.labels.*.name, ', ') }}`
+        - Author: `${{ github.actor }}`
+        [View PR](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})
+      color: '7506394'
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

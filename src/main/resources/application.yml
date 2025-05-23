@@ -1,0 +1,10 @@
+server:
+  port: 9100
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: cart-service
+  config:
+    import: optional:configserver:http://localhost:8888/

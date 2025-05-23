@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        versions: ["<1.0.0"]
+    labels:
+      - dependencies
+      - security
+    target-branch: ["develop", "main"]
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    target-branch: ["develop", "main"]
