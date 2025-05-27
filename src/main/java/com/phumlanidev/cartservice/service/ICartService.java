@@ -3,7 +3,6 @@ package com.phumlanidev.cartservice.service;
 
 import com.phumlanidev.cartservice.dto.CartDto;
 import com.phumlanidev.cartservice.model.Cart;
-import java.math.BigDecimal;
 
 /**
  * Comment: this is the placeholder for documentation.
@@ -18,7 +17,7 @@ public interface ICartService {
   /**
    * Comment: this is the placeholder for documentation.
    */
-  void addProductToCart(String userId, Long productId, BigDecimal quantity);
+  void addProductToCart(String userId, Long productId, Integer quantity);
 
   /**
    * Comment: this is the placeholder for documentation.
@@ -38,7 +37,7 @@ public interface ICartService {
   /**
    * Comment: this is the placeholder for documentation.
    */
-  void updateCartItemQuantity(String userId, Long cartItemId, BigDecimal quantity);
+  void updateCartItemQuantity(String userId, Long cartItemId, Integer quantity);
 
   /**
    * Comment: this is the placeholder for documentation.

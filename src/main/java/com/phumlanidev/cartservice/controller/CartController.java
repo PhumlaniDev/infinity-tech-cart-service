@@ -2,7 +2,6 @@ package com.phumlanidev.cartservice.controller;
 
 import com.phumlanidev.cartservice.dto.CartDto;
 import com.phumlanidev.cartservice.service.impl.CartServiceImpl;
-import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +42,7 @@ public class CartController {
    */
   @PostMapping("/add")
   public ResponseEntity<Void> addProductToCart(@AuthenticationPrincipal Jwt jwt,
-                                               Long productId, BigDecimal quantity) {
+                                               Long productId, Integer quantity) {
     cartService.addProductToCart(getUserId(jwt), productId, quantity);
     return ResponseEntity.ok().build();
   }
@@ -53,7 +52,7 @@ public class CartController {
    */
   @PatchMapping("/item/{itemId}")
   public ResponseEntity<Void> updateQuantity(@AuthenticationPrincipal Jwt jwt,
-                                             @PathVariable Long itemId, BigDecimal quantity) {
+                                             @PathVariable Long itemId, Integer quantity) {
     cartService.updateCartItemQuantity(getUserId(jwt), itemId, quantity);
     return ResponseEntity.ok().build();
   }
@@ -78,6 +77,6 @@ public class CartController {
   }
 
   private String getUserId(Jwt jwt) {
-    return jwt.getClaimAsString("sub");
+    return jwt.getSubject(); // Keycloak userId (UUID)
   }
 }

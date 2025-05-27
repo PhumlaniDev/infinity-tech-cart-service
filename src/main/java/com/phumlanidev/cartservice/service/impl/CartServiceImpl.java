@@ -9,7 +9,9 @@ import com.phumlanidev.cartservice.service.ICartService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CartServiceImpl implements ICartService {
 
   private final CartRepository cartRepository;
@@ -32,41 +35,40 @@ public class CartServiceImpl implements ICartService {
   @Override
   public CartDto getCartByUser(String userId) {
     Cart cart = getOrCreateCart(userId);
+    log.info("🛒 Retrieved cart with {} items for user {}", cart.getItems().size(), userId);
     return cartMapper.toDto(cart, new CartDto());
   }
 
   @Override
-  public void addProductToCart(String userId, Long productId, BigDecimal quantity) {
+  public void addProductToCart(String userId, Long productId, Integer quantity) {
     Cart cart = getOrCreateCart(userId);
 
     // Fetch product price from product service
     BigDecimal productPrice = productService.getProductPriceById(productId);
 
-    CartItem item = cart.getItems().stream()
+    Optional<CartItem> existingItemOpt = cart.getItems().stream()
             .filter(i -> i.getProductId().equals(productId))
-            .findFirst()
-            .orElse(CartItem.builder()
-                    .cart(cart)
-                    .productId(productId)
-                    .quantity(BigDecimal.ZERO)
-                    .price(productPrice).build());
+            .findFirst();
 
-    item.setQuantity(item.getQuantity().add(quantity));
-    item.setPrice(productPrice);
-    cart.getItems().add(item);
+    if (existingItemOpt.isPresent()) {
+      CartItem existingItem = existingItemOpt.get();
+      existingItem.setQuantity(existingItem.getQuantity());
+      existingItem.setPrice(productPrice);
+    } else {
+      CartItem newItem = CartItem.builder()
+              .productId(productId)
+              .quantity(quantity)
+              .price(productPrice)
+              .cart(cart) // Set the cart reference
+              .build();
+      cart.getItems().add(newItem);
+    }
     recalculateCartTotal(cart);
     cartRepository.save(cart);
 
     String clientIp = request.getRemoteAddr();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     String username = auth != null ? auth.getName() : "anonymous";
-
-    auditLogService.log(
-            "PRODUCT_CART_ADDED",
-            String.valueOf(userId),
-            username,
-            clientIp,
-            "Product added to cart: " + productId);
   }
 
   @Override
@@ -133,7 +135,7 @@ public class CartServiceImpl implements ICartService {
   }
 
   @Override
-  public void updateCartItemQuantity(String userId, Long cartItemId, BigDecimal quantity) {
+  public void updateCartItemQuantity(String userId, Long cartItemId, Integer quantity) {
     Cart cart = getOrCreateCart(userId);
     cart.getItems().stream()
             .filter(item -> item.getCartItemsId().equals(cartItemId))
@@ -157,7 +159,7 @@ public class CartServiceImpl implements ICartService {
   @Override
   public void recalculateCartTotal(Cart cart) {
     BigDecimal total = cart.getItems().stream()
-            .map(item -> item.getPrice().multiply(item.getQuantity()))
+            .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     cart.setTotalPrice(total);
   }

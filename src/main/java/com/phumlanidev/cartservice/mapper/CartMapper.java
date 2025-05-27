@@ -16,17 +16,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CartMapper {
 
-  private final CartItemMapper cartItemMapper;
-
   /**
    * Comment: this is the placeholder for documentation.
    */
   public Cart toEntity(CartDto cartDto, Cart cart) {
-    cart.setCartId(cartDto.getCartId());
     cart.setUserId(cartDto.getUserId());
     cart.setTotalPrice(cartDto.getTotalPrice());
     cart.setItems(cartDto.getCartItems().stream()
-            .map(cartItemDto -> cartItemMapper.toEntity(new CartItem(), cartItemDto))
+            .map(item -> {
+              CartItem i = new CartItem();
+              i.setProductId(item.getProductId());
+              i.setQuantity(item.getQuantity());
+              i.setPrice(item.getPrice());
+              return i;
+            })
             .collect(Collectors.toList()));
     return cart;
   }
@@ -34,13 +37,19 @@ public class CartMapper {
   /**
    * Comment: this is the placeholder for documentation.
    */
-  public CartDto toDto(Cart cart, CartDto cartDto) {
-    cartDto.setCartId(cart.getCartId());
-    cartDto.setUserId(cart.getUserId());
-    cartDto.setTotalPrice(cart.getTotalPrice());
-    cartDto.setCartItems(cart.getItems().stream()
-            .map(cartItemDto -> cartItemMapper.toDto(cartItemDto, new CartItemDto()))
-            .toList());
-    return cartDto;
+  public CartDto toDto(Cart cart, CartDto dto) {
+    dto.setUserId(cart.getUserId());
+    dto.setTotalPrice(cart.getTotalPrice());
+    dto.setCartItems(cart.getItems().stream()
+            .map(item -> {
+              CartItemDto i = new CartItemDto();
+              i.setProductId(item.getProductId());
+              i.setQuantity(item.getQuantity());
+              i.setPrice(item.getPrice());
+              return i;
+            })
+            .collect(Collectors.toList()));
+    return dto;
   }
+
 }
