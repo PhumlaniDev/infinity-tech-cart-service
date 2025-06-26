@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,9 +14,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/**
- * Comment: this is the placeholder for documentation.
- */
+import java.time.Instant;
+
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter
@@ -28,7 +26,7 @@ public class BaseEntity {
 
   @CreatedDate
   @Column(updatable = false)
-  private LocalDateTime createdAt;
+  private Instant createdAt = Instant.now();
 
   @CreatedBy
   @Column(updatable = false)
@@ -36,15 +34,12 @@ public class BaseEntity {
 
   @LastModifiedDate
   @Column(insertable = false)
-  private LocalDateTime updatedAt;
+  private Instant updatedAt;
 
   @LastModifiedBy
   @Column(insertable = false)
   private String updatedBy;
 
-  /**
-   * Comment: this is the placeholder for documentation.
-   */
   @PrePersist
   public void prePersist() {
     log.info("Setting createdAt: {}", createdAt);

@@ -1,5 +1,6 @@
 package com.phumlanidev.cartservice.service.impl;
 
+import com.phumlanidev.cartservice.config.JwtAuthenticationConverter;
 import com.phumlanidev.cartservice.dto.CartDto;
 import com.phumlanidev.cartservice.mapper.CartMapper;
 import com.phumlanidev.cartservice.model.Cart;
@@ -7,14 +8,16 @@ import com.phumlanidev.cartservice.model.CartItem;
 import com.phumlanidev.cartservice.repository.CartRepository;
 import com.phumlanidev.cartservice.service.ICartService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Comment: this is the placeholder for documentation.
@@ -30,6 +33,7 @@ public class CartServiceImpl implements ICartService {
   private final HttpServletRequest request;
   private final AuditLogServiceImpl auditLogService;
   private final ProductServiceImpl productService;
+  private JwtAuthenticationConverter jwtAuthenticationConverter;
 
 
   @Override
@@ -66,9 +70,8 @@ public class CartServiceImpl implements ICartService {
     recalculateCartTotal(cart);
     cartRepository.save(cart);
 
-    String clientIp = request.getRemoteAddr();
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
+    logAudit("ADD_PRODUCT_CART",
+            "Product added to cart: " + productId + ", Quantity: " + quantity);
   }
 
   @Override
@@ -78,18 +81,8 @@ public class CartServiceImpl implements ICartService {
     recalculateCartTotal(cart);
     cartRepository.save(cart);
 
-    String clientIp = request.getRemoteAddr();
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
-
-
-
-    auditLogService.log(
-            "REMOVE_PRODUCT_CART",
-            String.valueOf(userId),
-            username,
-            clientIp,
-            "Product removed from cart: " + cartItemId);
+    logAudit("REMOVE_CART_ITEM",
+            "Cart item removed: " + cartItemId);
   }
 
   @Override
@@ -101,16 +94,8 @@ public class CartServiceImpl implements ICartService {
                     .items(new ArrayList<>())
                     .build()));
 
-    String clientIp = request.getRemoteAddr();
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
-
-    auditLogService.log(
-            "CART_CREATED",
-            String.valueOf(userId),
-            username,
-            clientIp,
-            "Cart created for user: " + userId);
+    logAudit("GET_OR_CREATE_CART",
+            "Cart retrieved or created for user: " + userId);
 
     return cart;
   }
@@ -122,15 +107,7 @@ public class CartServiceImpl implements ICartService {
     cart.setTotalPrice(BigDecimal.ZERO);
     cartRepository.save(cart);
 
-    String clientIp = request.getRemoteAddr();
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
-
-    auditLogService.log(
-            "CART_CLEARED",
-            String.valueOf(userId),
-            username,
-            clientIp,
+    logAudit("CLEAR_CART",
             "Cart cleared for user: " + userId);
   }
 
@@ -144,16 +121,8 @@ public class CartServiceImpl implements ICartService {
     recalculateCartTotal(cart);
     cartRepository.save(cart);
 
-    String clientIp = request.getRemoteAddr();
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
-
-    auditLogService.log(
-            "UPDATE_CART_ITEM",
-            String.valueOf(userId),
-            username,
-            clientIp,
-            "Cart item updated: " + cartItemId);
+    logAudit("UPDATE_CART_ITEM_QUANTITY",
+            "Cart item quantity updated: " + cartItemId + ", New Quantity: " + quantity);
   }
 
   @Override
@@ -162,5 +131,22 @@ public class CartServiceImpl implements ICartService {
             .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     cart.setTotalPrice(total);
+  }
+
+  private void logAudit(String action, String details) {
+    String clientIp = request.getRemoteAddr();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String username = auth != null ? auth.getName() : "anonymous";
+    Jwt jwt = jwtAuthenticationConverter.getJwt();
+    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+
+
+    auditLogService.log(
+            action,
+            userId,
+            username,
+            clientIp,
+            details
+    );
   }
 }

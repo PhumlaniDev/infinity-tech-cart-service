@@ -1,11 +1,5 @@
 package com.phumlanidev.cartservice.config;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
@@ -17,9 +11,9 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-/**
- * Comment: this is the placeholder for documentation.
- */
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Component
 public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
@@ -35,6 +29,9 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
     authorities.addAll(extractRealmRoles(jwt));
     authorities.addAll(extractResourceRoles(jwt));
     authorities.addAll(extractTopLevelRoles(jwt));
+
+    System.out.println("🔐 Extracted authorities from token:");
+    authorities.forEach(a -> System.out.println(" -> " + a.getAuthority()));
 
     return new JwtAuthenticationToken(jwt, authorities, getPrincipleClaimName(jwt));
   }
@@ -83,5 +80,19 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
     return topRoles.stream()
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
             .collect(Collectors.toSet());
+  }
+
+  public String extractUserEmail(Jwt jwt) {
+    return jwt.getClaim("email");
+  }
+
+  public String extractUserId(Jwt jwt) {
+    return jwt.getClaim("sub");
+  }
+
+  public Jwt getJwt() {
+    // get token value from the current authentication context
+    return (Jwt) org.springframework.security.core.context.SecurityContextHolder.getContext()
+            .getAuthentication().getPrincipal();
   }
 }
