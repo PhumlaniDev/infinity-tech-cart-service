@@ -10,9 +10,6 @@ import com.phumlanidev.cartservice.service.ICartService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -33,18 +30,20 @@ public class CartServiceImpl implements ICartService {
   private final HttpServletRequest request;
   private final AuditLogServiceImpl auditLogService;
   private final ProductServiceImpl productService;
-  private JwtAuthenticationConverter jwtAuthenticationConverter;
+  private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
 
   @Override
-  public CartDto getCartByUser(String userId) {
+  public CartDto getCartByUser() {
+    String userId = jwtAuthenticationConverter.getCurrentUserId();
     Cart cart = getOrCreateCart(userId);
     log.info("🛒 Retrieved cart with {} items for user {}", cart.getItems().size(), userId);
     return cartMapper.toDto(cart, new CartDto());
   }
 
   @Override
-  public void addProductToCart(String userId, Long productId, Integer quantity) {
+  public void addProductToCart(Long productId, Integer quantity) {
+    String userId = jwtAuthenticationConverter.getCurrentUserId();
     Cart cart = getOrCreateCart(userId);
 
     // Fetch product price from product service
@@ -75,7 +74,8 @@ public class CartServiceImpl implements ICartService {
   }
 
   @Override
-  public void removeCartItem(String userId, Long cartItemId) {
+  public void removeCartItem(Long cartItemId) {
+    String userId = jwtAuthenticationConverter.getCurrentUserId();
     Cart cart = getOrCreateCart(userId);
     cart.getItems().removeIf(item -> item.getCartItemsId().equals(cartItemId));
     recalculateCartTotal(cart);
@@ -101,7 +101,8 @@ public class CartServiceImpl implements ICartService {
   }
 
   @Override
-  public void clearCart(String userId) {
+  public void clearCart() {
+    String userId = jwtAuthenticationConverter.getCurrentUserId();
     Cart cart = getOrCreateCart(userId);
     cart.getItems().clear();
     cart.setTotalPrice(BigDecimal.ZERO);
@@ -112,7 +113,8 @@ public class CartServiceImpl implements ICartService {
   }
 
   @Override
-  public void updateCartItemQuantity(String userId, Long cartItemId, Integer quantity) {
+  public void updateCartItemQuantity(Long cartItemId, Integer quantity) {
+    String userId = jwtAuthenticationConverter.getCurrentUserId();
     Cart cart = getOrCreateCart(userId);
     cart.getItems().stream()
             .filter(item -> item.getCartItemsId().equals(cartItemId))
@@ -135,10 +137,8 @@ public class CartServiceImpl implements ICartService {
 
   private void logAudit(String action, String details) {
     String clientIp = request.getRemoteAddr();
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth != null ? auth.getName() : "anonymous";
-    Jwt jwt = jwtAuthenticationConverter.getJwt();
-    String userId = jwtAuthenticationConverter.extractUserId(jwt);
+    String username = jwtAuthenticationConverter.getCurrentUsername();
+    String userId = jwtAuthenticationConverter.getCurrentUserId();
 
 
     auditLogService.log(

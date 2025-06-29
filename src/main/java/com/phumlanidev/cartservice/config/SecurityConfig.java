@@ -29,6 +29,7 @@ public class SecurityConfig {
             authorize -> authorize
                     .requestMatchers("/actuator/**").permitAll()
                     .requestMatchers("/api/v1/cart/**").hasRole("admin")
+                    .requestMatchers("/api/v1/products/**").hasRole("product-service-role")
                     .anyRequest().authenticated()).oauth2ResourceServer(
                             oauth2 -> oauth2.jwt(jwt ->
             jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));

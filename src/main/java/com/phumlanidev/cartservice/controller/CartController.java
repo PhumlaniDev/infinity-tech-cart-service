@@ -6,8 +6,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -24,9 +22,8 @@ public class CartController {
    * Comment: this is the placeholder for documentation.
    */
   @GetMapping
-  public ResponseEntity<CartDto> getCart(@Valid @AuthenticationPrincipal Jwt jwt) {
-    String userId = getUserId(jwt);
-    CartDto cart = cartService.getCartByUser(userId);
+  public ResponseEntity<CartDto> getCart() {
+    CartDto cart = cartService.getCartByUser();
     return ResponseEntity
             .status(HttpStatus.OK)
             .body(cart);
@@ -36,9 +33,8 @@ public class CartController {
    * Comment: this is the placeholder for documentation.
    */
   @PostMapping("/add")
-  public ResponseEntity<Void> addProductToCart(@Valid @AuthenticationPrincipal Jwt jwt,
-                                               Long productId, Integer quantity) {
-    cartService.addProductToCart(getUserId(jwt), productId, quantity);
+  public ResponseEntity<Void> addProductToCart(@Valid Long productId, Integer quantity) {
+    cartService.addProductToCart(productId, quantity);
     return ResponseEntity.ok().build();
   }
 
@@ -46,9 +42,8 @@ public class CartController {
    * Comment: this is the placeholder for documentation.
    */
   @PatchMapping("/item/{itemId}")
-  public ResponseEntity<Void> updateQuantity(@Valid @AuthenticationPrincipal Jwt jwt,
-                                             @PathVariable Long itemId, Integer quantity) {
-    cartService.updateCartItemQuantity(getUserId(jwt), itemId, quantity);
+  public ResponseEntity<Void> updateQuantity(@Valid @PathVariable Long itemId, @RequestParam Integer quantity) {
+    cartService.updateCartItemQuantity(itemId, quantity);
     return ResponseEntity.ok().build();
   }
 
@@ -56,9 +51,8 @@ public class CartController {
    * Comment: this is the placeholder for documentation.
    */
   @DeleteMapping("/item/{itemId}")
-  public ResponseEntity<Void> removeCartItem(@Valid @AuthenticationPrincipal Jwt jwt,
-                                             @PathVariable Long itemId) {
-    cartService.removeCartItem(getUserId(jwt), itemId);
+  public ResponseEntity<Void> removeCartItem(@Valid @PathVariable Long itemId) {
+    cartService.removeCartItem(itemId);
     return ResponseEntity.ok().build();
   }
 
@@ -66,12 +60,8 @@ public class CartController {
    * Comment: this is the placeholder for documentation.
    */
   @DeleteMapping("/clear")
-  public ResponseEntity<Void> clearCart(@Valid @AuthenticationPrincipal Jwt jwt) {
-    cartService.clearCart(getUserId(jwt));
+  public ResponseEntity<Void> clearCart() {
+    cartService.clearCart();
     return ResponseEntity.ok().build();
-  }
-
-  private String getUserId(Jwt jwt) {
-    return jwt.getSubject(); // Keycloak userId (UUID)
   }
 }
