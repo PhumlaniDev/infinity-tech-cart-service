@@ -5,14 +5,15 @@
     <lokiHttp>
       <url>http://localhost:3100/loki/api/v1/push</url>
     </lokiHttp>
-
-    <format>
-      <label>
-        app=cart-service
-        env=dev
-      </label>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
-    </format>
+    <pattern>
+      {
+      ""app": "cart-service",
+      "time": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}",
+      "level": "%level",
+      "thread": "%thread",
+      "logger": "%logger{36}",
+      "message": "%msg"
+    </pattern>
   </appender>
 
   <root level="INFO">
