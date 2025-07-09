@@ -92,7 +92,7 @@ jobs:
 
       - name: Build and Tag Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cart-service:${{ github.run_number }} .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cart-service:${{ github.run_number }} cart-service/
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/cart-service:${{ github.run_number }} ${{ secrets.DOCKERHUB_USERNAME }}/cart-service:latest
 
       - name: Log in to Docker Hub
