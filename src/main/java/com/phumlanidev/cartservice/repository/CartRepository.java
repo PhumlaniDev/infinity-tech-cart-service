@@ -2,9 +2,10 @@ package com.phumlanidev.cartservice.repository;
 
 
 import com.phumlanidev.cartservice.model.Cart;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /**
  * Comment: this is the placeholder for documentation.
