@@ -147,7 +147,6 @@ jobs:
   notify:
     uses: PhumlaniDev/reusable-workflows/.github/workflows/discord-notify.yml@main
     needs:
-      - checkstyle
       - build
       - unit-tests
       - sast
