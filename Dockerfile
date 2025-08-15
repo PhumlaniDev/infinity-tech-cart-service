@@ -14,7 +14,7 @@ FROM eclipse-temurin:21-jre-jammy
 RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser -s /bin/bash -m appuser
 
 WORKDIR /app
-COPY --from=builder /app/target/cart-service-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/cart-service-0.0.1-SNAPSHOT-exec.jar app.jar
 
 # Change file permissions and ownership (optional but good)
 RUN chown -R appuser:appuser /app
