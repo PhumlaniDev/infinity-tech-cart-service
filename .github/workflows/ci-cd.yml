@@ -6,7 +6,6 @@ permissions:
   actions: read
   security-events: write
   pull-requests: read
-  packages: write
 
 on:
   workflow_dispatch:
@@ -16,7 +15,20 @@ on:
     branches: [ develop, main ]
 
 jobs:
+
+  checkstyle:
+    name: Checkstyle
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run Checkstyle
+        run: mvn --batch-mode checkstyle:check
+
   build:
+    needs: checkstyle
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-build-test.yml@main
     secrets: inherit
 
@@ -29,7 +41,7 @@ jobs:
     needs: build
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-docker.yml@main
     with:
-      project_name: cart-service-service
+      project_name: cart-service
     secrets: inherit
 
   sca:
@@ -37,7 +49,7 @@ jobs:
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-sca.yml@main
     with:
       image_tag: ${{ needs.docker.outputs.image_tag }}
-      project_name: cart-service-service
+      project_name: cart-service
     secrets: inherit
 
   #  dast:
@@ -48,28 +60,28 @@ jobs:
   #      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   #      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
   #    with:
-  #      image-tag: '${{ secrets.DOCKERHUB_USERNAME }}/infinity-cart-service-service:latest'
+  #      image-tag: '${{ secrets.DOCKERHUB_USERNAME }}/infinity-auth-service:latest'
 
   notify:
     uses: PhumlaniDev/reusable-workflows/.github/workflows/discord-notify.yml@main
     needs:
+      - checkstyle
       - build
       - sast
       - sca
-      - docker
     if: always()
     with:
       status: >-
-        ${{ (needs.build.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success' && needs.docker.result == 'success') && 'success' || 'failure' }}
+        ${{ (needs.unit-tests.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success' && needs.dast.result == 'success') && 'success' || 'failure' }}
       title: "🚀 Workflow Run - Combined Status"
       description: |
+        Checkstyle: `${{ needs.checkstyle.result }}`
         Build: `${{ needs.build.result }}`
         SAST: `${{ needs.sast.result }}`
         SCA: `${{ needs.sca.result }}`
-        Docker: `${{ needs.docker.result }}`
         Commit: `${{ github.sha }}`
         [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
       color: >-
-        ${{ (needs.build.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success' && needs.docker.result == 'success') && '3066993' || '15158332' }}
+        ${{ (needs.unit-tests.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success' && needs.dast.result == 'success') && '3066993' || '15158332' }}
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
