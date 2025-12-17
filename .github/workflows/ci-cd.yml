@@ -30,11 +30,16 @@ jobs:
     needs: checkstyle
     permissions:
       actions: read
+      contents: read
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-build-test.yml@main
     secrets: inherit
 
   sast:
     needs: build
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-sast.yml@main
     secrets: inherit
 
@@ -50,6 +55,10 @@ jobs:
 
   sca:
     needs: docker
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-sca.yml@main
     with:
       image_tag: ${{ needs.docker.outputs.image_tag }}
