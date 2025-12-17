@@ -83,7 +83,7 @@ jobs:
         run: mvn --batch-mode clean install -DskipTests -Dspring.profiles.active=dev --settings .github/settings.xml
         env:
           GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/productdb
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/cart_db
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: postgres
           JASYPT_ENCRYPTOR_PASSWORD: ${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }}
