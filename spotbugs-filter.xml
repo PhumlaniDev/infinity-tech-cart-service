@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Suppress everything except high/medium confidence security bugs -->
+    <Match>
+        <Confidence value="low"/>
+        <BugCategory value="PERFORMANCE|BAD_PRACTICE|STYLE|I18N|MT_CORRECTNESS|..." /> <!-- add categories you don't care about -->
+    </Match>
+
+    <!-- Or suppress by specific bug patterns you see a lot -->
+    <Match>
+        <Bug pattern="DM_CONVERTER|NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE|..." />
+    </Match>
+
+    <!-- Example: ignore generated code / tests / third-party folders -->
+    <Match>
+        <Class name="~.*\.generated\..*" />
+    </Match>
+</FindBugsFilter>

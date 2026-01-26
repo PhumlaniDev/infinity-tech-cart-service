@@ -4,7 +4,6 @@ permissions:
   issues: read
   contents: read
   actions: read
-  security-events: write
   pull-requests: read
 
 on:
@@ -15,24 +14,21 @@ on:
     branches: [ develop, main ]
 
 jobs:
-
-  checkstyle:
-    name: Checkstyle
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Run Checkstyle
-        run: mvn --batch-mode checkstyle:check
-
   build:
-    needs: checkstyle
     permissions:
       actions: read
       contents: read
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-build-test.yml@main
     secrets: inherit
+
+  checkstyle:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Run Checkstyle
+        run: mvn --batch-mode checkstyle:check
 
   sast:
     needs: build
@@ -78,23 +74,24 @@ jobs:
   notify:
     uses: PhumlaniDev/reusable-workflows/.github/workflows/discord-notify.yml@main
     needs:
-      - checkstyle
       - build
+      - checkstyle
       - sast
+      - docker
       - sca
     if: always()
     with:
       status: >-
-        ${{ (needs.unit-tests.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success' && needs.dast.result == 'success') && 'success' || 'failure' }}
+        ${{ (needs.build.result == 'success' && needs.checkstyle.result == 'success' && needs.docker.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success') && 'success' || 'failure' }}
       title: "🚀 Workflow Run - Combined Status"
       description: |
-        Checkstyle: `${{ needs.checkstyle.result }}`
         Build: `${{ needs.build.result }}`
+        Checkstyle: `${{ needs.checkstyle.result }}`
         SAST: `${{ needs.sast.result }}`
         SCA: `${{ needs.sca.result }}`
         Commit: `${{ github.sha }}`
         [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
       color: >-
-        ${{ (needs.unit-tests.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success' && needs.dast.result == 'success') && '3066993' || '15158332' }}
+        ${{ (needs.build.result == 'success' && needs.checkstyle.result == 'success' && needs.docker.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success') && '3066993' || '15158332' }}
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
