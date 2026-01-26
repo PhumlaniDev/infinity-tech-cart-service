@@ -43,6 +43,7 @@ jobs:
     needs: build
     permissions:
       packages: write      # Required for pushing to ghcr.io
+      actions: read
       contents: read
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-docker.yml@main
     with:
