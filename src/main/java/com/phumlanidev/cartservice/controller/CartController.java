@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.ExecutionException;
-
 /**
  * Comment: this is the placeholder for documentation.
  */
@@ -35,7 +33,7 @@ public class CartController {
    * Comment: this is the placeholder for documentation.
    */
   @PostMapping("/add")
-  public ResponseEntity<Void> addProductToCart(@Valid Long productId, Integer quantity) throws ExecutionException, InterruptedException {
+  public ResponseEntity<Void> addProductToCart(@Valid Long productId, Integer quantity) {
     cartService.addProductToCart(productId, quantity);
     return ResponseEntity.ok().build();
   }
