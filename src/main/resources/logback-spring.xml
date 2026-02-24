@@ -2,7 +2,7 @@
 <configuration>
 
 	<!-- Define variables -->
-	<property name="LOKI_URL" value="http://localhost:3100/loki/api/v1/push" />
+	<property name="LOKI_URL" value="https://loki.phumlaniarendse.co.za/loki/api/v1/push" />
 	<property name="SERVICE_NAME" value="cart-service" />
 	<property name="ENVIRONMENT" value="dev" />
 
