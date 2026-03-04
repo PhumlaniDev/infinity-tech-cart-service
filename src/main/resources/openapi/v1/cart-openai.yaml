@@ -1,0 +1,246 @@
+openapi: 3.1.0
+info:
+  title: Cart API
+  description: |
+    REST endpoint for managing a user's shopping cart.
+    
+    All operation in this group require as authenticated user.
+    Authentication is typically done via Bearer token (JWT) in the `Authorization` header.
+  version: 1.0.0
+  contact:
+    name: Infinity Tech Support
+    email: infinitytech@support.co.za
+  license:
+    name: Proprietary License - All rights reserved.
+    url: https://infinitytech.co.za/terms
+    
+servers:
+  - url: https://api.infinitytech.com/v1
+    description: Production server
+  - url: https://staging-api.infinitytech.com/v1
+    description: Staging server
+    
+tags:
+  - name: Cart
+    description: Operations for adding, updating and clearing items in the shopping cart
+
+paths:
+  /cart/add:
+    post:
+      tags:
+          - Cart
+      summary: Add product to cart
+      description: Adds a product to the authenticated user's shopping cart. If the product already exists in the cart, it will update the quantity.
+      operationId: addProductToCart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '200':
+          description: Product successfully added to cart( or quantity increased if already in cart)
+          content:
+            application/json:
+              schema:
+                type: '#/components/schemas/UserRegisterationResponse'
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 404
+                message: "No product found with the provided product ID. Please check the product ID and try again."
+        '422':
+          description: Invalid quantity (e.g. zero or negative)
+          content:
+            application/json:
+              schema:
+                type: '#/components/schemas/ErrorResponse'
+  
+  /cart/item/{itemId}:
+    put:
+      tags:
+          - Cart
+      summary: Update cart item quantity
+      description: Updates the quantity of a specific item in the authenticated user's shopping cart. If the quantity is set to zero, the item will be removed from the cart.
+      operationId: updateCartItemQuantity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the cart item to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: '#/components/schemas/UpdateCartItemRequest'
+      responses:
+        '200':
+          description: Cart item quantity successfully updated (or item removed if quantity set to zero)
+          content:
+            application/json:
+              schema:
+                type: '#/components/schemas/UserRegisterationResponse'
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Cart item not found
+          content:
+            application/json:
+              schema:
+                type: '#/components/schemas/ErrorResponse'
+              examples:
+                statusCode: 404
+                message: "No cart item found with the provided item ID. Please check the item ID and try again."
+        '422':
+          description: Invalid quantity (e.g. negative)
+          content:
+            application/json:
+              schema:
+                type: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      tags:
+        - Cart
+      summary: Remove item from cart
+      description: Removes a specific item from the authenticated user's shopping cart.
+      operationId: removeCartItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID of the cart item to remove
+      responses:
+        '200':
+          description: Cart item successfully removed
+          content:
+            application/json:
+              schema:
+                type: '#/components/schemas/UserRegisterationResponse'
+                additionalProperties: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Cart item not found
+          content:
+            application/json:
+              schema:
+                type: '#/components/schemas/ErrorResponse'
+              examples:
+                status: 404
+                message: 'No cart item found with the provided item ID. Please check the item ID and try again.'
+  
+  /cart/clear:
+    delete:
+      tags:
+        - Cart
+      summary: Clear shopping cart
+      description: Removes all items from the authenticated user's shopping cart.
+      operationId: clearCart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Shopping cart successfully cleared
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    AddToCartRequest:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+          productId:
+            type: inetger
+            format: int64
+            example: 12345
+            description: The unique identifier of the product to add to the cart.
+          quantity:
+            type: integer
+            minimum: 1
+            example: 2
+            description: The quantity of the product to add to the cart. Must be a positive integer.
+    
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation failed."
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              reason:
+                type: string
+      example:
+        status: 400
+        message: "quantity must be greater than 0"
+  
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            message: "Invalid request"
+            errors:
+              - field: "quantity"
+                reason: "quantity must be greater than 0"
+    
+    Unauthorized:
+      description: Authentication required or failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 401
+            message: "Unauthorized. Please provide a valid authentication token."
+    
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
