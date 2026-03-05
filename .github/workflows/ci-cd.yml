@@ -14,21 +14,21 @@ on:
     branches: [ develop, main ]
 
 jobs:
-  build:
-    permissions:
-      actions: read
-      contents: read
-    uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-build-test.yml@main
-    secrets: inherit
-
   checkstyle:
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Run Checkstyle
         run: mvn --batch-mode checkstyle:check
+  
+  build:
+    needs: checkstyle
+    permissions:
+      actions: read
+      contents: read
+    uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-build-test.yml@main
+    secrets: inherit
 
   sast:
     needs: build
