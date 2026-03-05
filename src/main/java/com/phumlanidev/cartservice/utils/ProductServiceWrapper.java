@@ -24,7 +24,7 @@ public class ProductServiceWrapper {
   }
 
   public BigDecimal getProductPriceByIdFallback(Long productId, Throwable ex) {
-    log.error("Getting product price failed: {}", ex.getMessage());
+    log.error("Getting product price for id {} failed: {}", productId, ex.getMessage());
     return BigDecimal.ZERO;
   }
 }
