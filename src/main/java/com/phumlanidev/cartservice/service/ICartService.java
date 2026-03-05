@@ -4,6 +4,8 @@ package com.phumlanidev.cartservice.service;
 import com.phumlanidev.cartservice.dto.CartDto;
 import com.phumlanidev.cartservice.model.Cart;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * Comment: this is the placeholder for documentation.
  */
@@ -17,7 +19,7 @@ public interface ICartService {
   /**
    * Comment: this is the placeholder for documentation.
    */
-  void addProductToCart(Long productId, Integer quantity);
+  void addProductToCart(Long productId, Integer quantity) throws ExecutionException, InterruptedException;
 
   /**
    * Comment: this is the placeholder for documentation.

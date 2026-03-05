@@ -7,6 +7,7 @@ import com.phumlanidev.cartservice.model.Cart;
 import com.phumlanidev.cartservice.model.CartItem;
 import com.phumlanidev.cartservice.repository.CartRepository;
 import com.phumlanidev.cartservice.service.ICartService;
+import com.phumlanidev.cartservice.utils.ProductServiceWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
-
-/**
- * Comment: this is the placeholder for documentation.
- */
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +26,7 @@ public class CartServiceImpl implements ICartService {
   private final CartMapper cartMapper;
   private final HttpServletRequest request;
   private final AuditLogServiceImpl auditLogService;
-  private final ProductServiceImpl productService;
+  private final ProductServiceWrapper productServiceWrapper;
   private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
 
@@ -47,7 +44,7 @@ public class CartServiceImpl implements ICartService {
     Cart cart = getOrCreateCart(userId);
 
     // Fetch product price from product service
-    BigDecimal productPrice = productService.getProductPriceById(productId);
+    BigDecimal productPrice = productServiceWrapper.getProductPriceById(productId);
 
     Optional<CartItem> existingItemOpt = cart.getItems().stream()
             .filter(i -> i.getProductId().equals(productId))
