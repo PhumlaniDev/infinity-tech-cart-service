@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -27,29 +26,17 @@ import static org.mockito.Mockito.*;
 @DisplayName("AuditLogServiceImpl Tests")
 class AuditLogServiceImplTest {
 
-  // ─────────────────────────────────────────────
-  // Mocks & Subject
-  // ─────────────────────────────────────────────
-
   @Mock
   private AuditLogRepository auditLogRepository;
 
   @InjectMocks
   private AuditLogServiceImpl auditLogService;
 
-  // ─────────────────────────────────────────────
-  // Shared fixtures
-  // ─────────────────────────────────────────────
-
   private static final String ACTION     = "ADD_PRODUCT_CART";
   private static final String USER_ID    = "user-123";
   private static final String USERNAME   = "phumlani";
   private static final String IP_ADDRESS = "127.0.0.1";
   private static final String DETAILS    = "Product added to cart: 10, Quantity: 2";
-
-  // ═══════════════════════════════════════════════════════════════
-  // log()
-  // ═══════════════════════════════════════════════════════════════
 
   @Nested
   @DisplayName("log()")
@@ -130,10 +117,6 @@ class AuditLogServiceImplTest {
       assertThat(captor.getValue().getUserId()).isNull();
     }
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  // getAuditLogs()
-  // ═══════════════════════════════════════════════════════════════
 
   @Nested
   @DisplayName("getAuditLogs()")
