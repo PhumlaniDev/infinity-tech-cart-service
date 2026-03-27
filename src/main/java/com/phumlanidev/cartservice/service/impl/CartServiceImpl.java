@@ -52,7 +52,7 @@ public class CartServiceImpl implements ICartService {
 
     if (existingItemOpt.isPresent()) {
       CartItem existingItem = existingItemOpt.get();
-      existingItem.setQuantity(existingItem.getQuantity());
+      existingItem.setQuantity(existingItem.getQuantity() + quantity);
       existingItem.setPrice(productPrice);
     } else {
       CartItem newItem = CartItem.builder()

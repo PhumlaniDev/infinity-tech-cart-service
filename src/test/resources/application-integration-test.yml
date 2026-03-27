@@ -1,0 +1,69 @@
+spring:
+  
+  # Disable config
+  cloud:
+    config:
+      enabled: false
+  
+  # JPA - create create schema from entities
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  # Security - disable JWT issuer
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost/disabled
+          jwk-set-uri: http://localhost/disabled
+  
+# Keycloak dummy values
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: test-realm
+  resource: cart-service
+  credentials:
+    secret: test-secret
+  admin:
+    username: test-admin
+    password: test-password
+  logout_uri: http://localhost:8080/realms/test-realm/protocol/openid-connect/logout
+  principle-attribute: preferred_username
+  
+  # Cache - disable Redis caching
+  cache:
+    type: none
+
+# Eureka - disable all service discovery
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+# Resilience4J - disable circuit breaker
+resillience4j :
+  circuitbreaker:
+    instances:
+      productService:
+        sliding-window-size: 100
+        failure-rate-threshold: 100
+        wait-duration-in-open-state: 1s
+  retry:
+    instances:
+      productService:
+        max-attempts: 1
+
+# Logging
+logging:
+  level:
+    com.phumlanidev.cartservice: DEBUG
+    org.hibernate.SQL: DEBUG
+    com.github.tomakegurt.wiremock: WARN
+    org.testcontainers: WARN
