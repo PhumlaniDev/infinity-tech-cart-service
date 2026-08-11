@@ -258,12 +258,12 @@
         <repository>
             <id>nexus-releases</id>
             <name>Nexus Releases Repository</name>
-            <url>https://nexus.phumlaniarendse.co.za/repository/maven-releases/</url>
+            <url>https://nexus.phumlani.dev/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>nexus-snapshots</id>
             <name>Nexus Snapshots Repository</name>
-            <url>https://nexus.phumlaniarendse.co.za/repository/maven-snapshots/</url>
+            <url>https://nexus.phumlani.dev/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
