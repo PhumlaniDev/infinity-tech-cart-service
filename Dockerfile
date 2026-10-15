@@ -20,7 +20,7 @@ RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser -s /bin/bash -m appus
 
 WORKDIR /app
 
-COPY --from=builder /app/target/app.jar app.jar
+COPY --from=builder /app/target/app-exec.jar app.jar
 
 # Change file permissions and ownership (optional but good)
 RUN chown -R appuser:appuser /app
