@@ -13,21 +13,18 @@ on:
   push:
     branches: [ develop, main ]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  checkstyle:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Run Checkstyle
-        run: mvn --batch-mode checkstyle:check
-  
   build:
-    needs: checkstyle
     permissions:
       actions: read
       contents: read
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-build-test.yml@main
+    with:
+      postgres-db: cart_db
     secrets: inherit
 
   sast:
@@ -40,14 +37,14 @@ jobs:
     secrets: inherit
 
   docker:
-    needs: build
+    needs: [build, sast]
     permissions:
-      packages: write      # Required for pushing to ghcr.io
       actions: read
       contents: read
     uses: PhumlaniDev/reusable-workflows/.github/workflows/java-maven-docker.yml@main
     with:
       project_name: cart-service
+      target: ci
     secrets: inherit
 
   sca:
@@ -70,29 +67,25 @@ jobs:
   #      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   #      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
   #    with:
-  #      image-tag: '${{ secrets.DOCKERHUB_USERNAME }}/infinity-auth-service:latest'
+  #      image-tag: '${{ secrets.DOCKERHUB_USERNAME }}/infinity-cart-service:latest'
 
   notify:
-    uses: PhumlaniDev/reusable-workflows/.github/workflows/discord-notify.yml@main
-    needs:
-      - build
-      - checkstyle
-      - sast
-      - docker
-      - sca
+    needs: [ build, sast, docker, sca ]
     if: always()
+    uses: PhumlaniDev/reusable-workflows/.github/workflows/discord-notify.yml@main
     with:
+      # Colour is derived from this status inside the reusable workflow.
       status: >-
-        ${{ (needs.build.result == 'success' && needs.checkstyle.result == 'success' && needs.docker.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success') && 'success' || 'failure' }}
-      title: "🚀 Workflow Run - Combined Status"
+        ${{ contains(needs.*.result, 'failure') && 'failure'
+        || contains(needs.*.result, 'cancelled') && 'cancelled'
+        || 'success' }}
+      title: "🚀 cart-service CI"
       description: |
-        Build: `${{ needs.build.result }}`
-        Checkstyle: `${{ needs.checkstyle.result }}`
+        Build (incl. Checkstyle): `${{ needs.build.result }}`
         SAST: `${{ needs.sast.result }}`
+        Docker: `${{ needs.docker.result }}`
         SCA: `${{ needs.sca.result }}`
-        Commit: `${{ github.sha }}`
-        [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-      color: >-
-        ${{ (needs.build.result == 'success' && needs.checkstyle.result == 'success' && needs.docker.result == 'success' && needs.sast.result == 'success' && needs.sca.result == 'success') && '3066993' || '15158332' }}
+        Branch: `${{ github.ref_name }}`
+        [View commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

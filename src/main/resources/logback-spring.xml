@@ -2,7 +2,7 @@
 <configuration>
 
 	<!-- Define variables -->
-	<property name="LOKI_URL" value="https://${OBSERVABILITY_HOST}:${OBSERVABILITY_LOKI_PORT}/loki/api/v1/push" />
+	<property name="LOKI_URL" value="http://${OBSERVABILITY_HOST}:${OBSERVABILITY_LOKI_PORT}/loki/api/v1/push" />
 	<property name="SERVICE_NAME" value="cart-service" />
 	<property name="ENVIRONMENT" value="dev" />
 
